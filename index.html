@@ -1,53 +1,92 @@
-
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="uk">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR.js Веб-Додаток із Твоїми Файлами</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AR Камера</title>
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/ar-js-org@2.2.2/three.js/build/ar.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <style>
-        body { margin: 0; overflow: hidden; font-family: Monospace; }
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            touch-action: none;
+            font-family: Arial, sans-serif;
+        }
+        a-scene {
+            width: 100% !important;
+            height: 100% !important;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
         #overlay-text {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            font-size: 2em; color: #39FF14; text-shadow: 0 0 10px #39FF14, 0 0 20px #39FF14;
-            display: none; z-index: 10; pointer-events: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #FFD700;
+            font-size: 2em;
+            font-weight: bold;
+            text-shadow: 2px 2px 6px #000;
+            z-index: 10;
+            text-align: center;
+            width: 90%;
+            display: none;
         }
         #listen-button, #exit-button {
-            position: fixed; bottom: 100px; z-index: 10;
-            padding: 10px 20px; font-size: 1.2em; background: #39FF14; color: black;
-            border: none; border-radius: 5px; cursor: pointer;
+            position: fixed;
+            bottom: 100px;
+            z-index: 10;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            background: #ff0044;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
         #listen-button { left: 20px; }
         #exit-button { right: 20px; }
-        #footer-text {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            font-size: 1em; color: #39FF14; text-shadow: 0 0 5px #39FF14;
-            text-align: center; z-index: 10;
+        #listen-button:hover, #exit-button:hover {
+            background: #cc0036;
         }
-        #footer-text a { color: #39FF14; text-decoration: underline; }
-        a-scene { width: 100vw; height: 100vh; }
+        #smartLessaBtn {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff0044;
+            color: white;
+            padding: 14px 24px;
+            border-radius: 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            text-decoration: none;
+            z-index: 10;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        #smartLessaBtn:hover {
+            background: #cc0036;
+        }
     </style>
 </head>
 <body>
     <div id="overlay-text">Виявлено зображення!</div>
     <button id="listen-button" style="display: none;">Слухати</button>
     <button id="exit-button" style="display: none;">Вийти</button>
-    <div id="footer-text">
-        @SmartLessa (<a href="https://www.youtube.com/playlist?list=PL6UDFwT9TzFxsVdFiEBsQ9yFpcYRPOpfO" target="_blank">YouTube</a>)
-    </div>
-    <a-scene
-        embedded
-        arjs="sourceType: webcam; sourceWidth: 1280; sourceHeight: 720; trackingMethod: best; debugUIEnabled: false; videoTexture: true;"
-        vr-mode-ui="enabled: false"
-        renderer="antialias: true; alpha: true; precision: medium;"
-    >
+    <a href="https://youtube.com/playlist?list=PL6UDFwT9TzFxsVdFiEBsQ9yFpcYRPOpfO&si=IyXv1SkdPyvhcW7Z" id="smartLessaBtn" target="_blank">@SmartLessa</a>
+
+    <a-scene embedded id="arScene" arjs="sourceType: webcam; detectionMode: mono; trackingMethod: best;">
         <a-assets>
-            <img id="our-png" src="overlay.png">
-            <audio id="our-audio" src="sound.mp3" preload="auto"></audio>
+            <img id="our-png" src="overlay.png"> <!-- Заміни на "raw" URL для GitHub -->
+            <audio id="our-audio" src="sound.mp3" preload="auto"> <!-- Заміни на "raw" URL для GitHub -->
         </a-assets>
-        <a-marker type="pattern" url="marker.patt">
+        <a-marker id="marker" type="pattern" url="marker.patt"> <!-- Заміни на "raw" URL для GitHub -->
             <a-image
                 src="#our-png"
                 position="0 0 0"
@@ -55,31 +94,29 @@
                 animation="property: rotation; to: 0 360 0; loop: true; dur: 5000"
             ></a-image>
         </a-marker>
-        <a-camera position="0 0 0" look-controls="enabled: false" arjs-look-controls></a-camera>
+        <a-entity camera></a-entity>
     </a-scene>
+
     <script>
+        const marker = document.getElementById('marker');
         const overlayText = document.getElementById('overlay-text');
-        const audio = document.getElementById('our-audio');
         const listenButton = document.getElementById('listen-button');
         const exitButton = document.getElementById('exit-button');
-        const scene = document.querySelector('a-scene');
+        const audio = document.getElementById('our-audio');
+        const arScene = document.getElementById('arScene');
 
         // Обробка подій маркера
-        AFRAME.registerComponent('markerhandler', {
-            init: function () {
-                this.el.addEventListener('markerFound', () => {
-                    overlayText.style.display = 'block';
-                    listenButton.style.display = 'block';
-                    exitButton.style.display = 'block';
-                });
-                this.el.addEventListener('markerLost', () => {
-                    overlayText.style.display = 'none';
-                    audio.pause();
-                    audio.currentTime = 0;
-                });
-            }
+        marker.addEventListener('markerFound', () => {
+            overlayText.style.display = 'block';
+            listenButton.style.display = 'block';
+            exitButton.style.display = 'block';
         });
-        document.querySelector('a-marker').setAttribute('markerhandler', '');
+
+        marker.addEventListener('markerLost', () => {
+            overlayText.style.display = 'none';
+            audio.pause();
+            audio.currentTime = 0;
+        });
 
         // Кнопка "Слухати"
         listenButton.addEventListener('click', () => {
@@ -99,23 +136,15 @@
             overlayText.style.display = 'none';
             listenButton.style.display = 'none';
             exitButton.style.display = 'none';
-            scene.setAttribute('arjs', 'sourceType: none');
+            arScene.setAttribute('arjs', 'sourceType: none');
         });
 
-        // Адаптація розміру сцени
-        window.addEventListener('resize', () => {
-            scene.setAttribute('arjs', `sourceWidth: ${window.innerWidth}; sourceHeight: ${window.innerHeight}`);
-        });
-
-        // Перевірка доступу до камери
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-            .then(stream => {
-                console.log('Задня камера активована');
-            })
-            .catch(err => {
-                console.error('Помилка доступу до камери:', err);
-                alert('Не вдалося отримати доступ до камери. Переконайтеся, що використовуєте HTTPS і дозволили доступ.');
-            });
+        // Фікс висоти для мобільних браузерів
+        function fixHeight() {
+            document.body.style.height = window.innerHeight + 'px';
+        }
+        window.addEventListener('resize', fixHeight);
+        fixHeight();
     </script>
 </body>
 </html>
