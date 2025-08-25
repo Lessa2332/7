@@ -1,14 +1,14 @@
+
 <!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR.js Веб-Додаток із Кнопками</title>
+    <title>AR.js Веб-Додаток із Твоїми Файлами</title>
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-    <script src="https://unpkg.com/aframe@1.6.0/dist/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/ar-js-org@2.2.2/three.js/build/ar-nft.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ar-js-org@2.2.2/three.js/build/ar.js"></script>
     <style>
-        body { margin: 0; overflow: hidden; }
+        body { margin: 0; overflow: hidden; font-family: Monospace; }
         #overlay-text {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             font-size: 2em; color: #39FF14; text-shadow: 0 0 10px #39FF14, 0 0 20px #39FF14;
@@ -41,27 +41,20 @@
         embedded
         arjs="sourceType: webcam; sourceWidth: 1280; sourceHeight: 720; trackingMethod: best; debugUIEnabled: false; videoTexture: true;"
         vr-mode-ui="enabled: false"
-        renderer="logarithmicDepthBuffer: true;"
+        renderer="antialias: true; alpha: true; precision: medium;"
     >
         <a-assets>
-            <img id="our-png" src="https://raw.githubusercontent.com/твій_юзер/твій_репозиторій/main/моя/overlay.png">
-            <audio id="our-audio" src="https://raw.githubusercontent.com/твій_юзер/твій_репозиторій/main/моя/sound.mp3" preload="auto"></audio>
+            <img id="our-png" src="overlay.png">
+            <audio id="our-audio" src="sound.mp3" preload="auto"></audio>
         </a-assets>
-        <a-nft
-            type="nft"
-            url="https://raw.githubusercontent.com/твій_юзер/твій_репозиторій/main/моя/marker"
-            smooth="true"
-            smoothCount="10"
-            smoothTolerance="0.01"
-            smoothThreshold="5"
-        >
+        <a-marker type="pattern" url="marker.patt">
             <a-image
                 src="#our-png"
                 position="0 0 0"
                 scale="1 1 1"
                 animation="property: rotation; to: 0 360 0; loop: true; dur: 5000"
             ></a-image>
-        </a-nft>
+        </a-marker>
         <a-camera position="0 0 0" look-controls="enabled: false" arjs-look-controls></a-camera>
     </a-scene>
     <script>
@@ -86,7 +79,7 @@
                 });
             }
         });
-        document.querySelector('a-nft').setAttribute('markerhandler', '');
+        document.querySelector('a-marker').setAttribute('markerhandler', '');
 
         // Кнопка "Слухати"
         listenButton.addEventListener('click', () => {
@@ -106,23 +99,22 @@
             overlayText.style.display = 'none';
             listenButton.style.display = 'none';
             exitButton.style.display = 'none';
-            scene.setAttribute('arjs', 'sourceType: none'); // Зупиняємо AR
+            scene.setAttribute('arjs', 'sourceType: none');
         });
 
-        // Адаптація розміру сцени при зміні розміру екрану
+        // Адаптація розміру сцени
         window.addEventListener('resize', () => {
-            const scene = document.querySelector('a-scene');
             scene.setAttribute('arjs', `sourceWidth: ${window.innerWidth}; sourceHeight: ${window.innerHeight}`);
         });
 
         // Перевірка доступу до камери
         navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
             .then(stream => {
-                console.log('Камера доступна');
+                console.log('Задня камера активована');
             })
             .catch(err => {
                 console.error('Помилка доступу до камери:', err);
-                alert('Не вдалося отримати доступ до камери. Переконайтеся, що використовуєте HTTPS і дозволили доступ до камери.');
+                alert('Не вдалося отримати доступ до камери. Переконайтеся, що використовуєте HTTPS і дозволили доступ.');
             });
     </script>
 </body>
